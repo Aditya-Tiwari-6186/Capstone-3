@@ -1,0 +1,29 @@
+{
+  "name": "securemark",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Cryptography-enhanced invisible image watermarking for ownership verification and tamper detection",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "node --test test/*.test.js",
+    "eval": "node scripts/eval.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "jose": "^5.9.6",
+    "next": "^14.2.0",
+    "nodemailer": "^6.9.16",
+    "pdf-lib": "^1.17.1",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "sharp": "^0.33.5"
+  },
+  "engines": {
+    "node": ">=18.18"
+  }
+}

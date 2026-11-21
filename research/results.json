@@ -1,0 +1,472 @@
+{
+ "generated": "2026-11-20T12:17:18.198Z",
+ "images": [
+  "astronaut.png",
+  "chelsea.png",
+  "china.png",
+  "coffee.png",
+  "flower.png",
+  "mpl_grace_hopper.png",
+  "rocket.png",
+  "stereo_motorcycle.png"
+ ],
+ "note": "Real photographs.",
+ "configs": [
+  {
+   "id": "dct-single",
+   "label": "DCT, single embedding",
+   "alg": "dct",
+   "redundant": false,
+   "ecc": false,
+   "bitsEmbedded": 320
+  },
+  {
+   "id": "dwt-single",
+   "label": "DWT, single embedding",
+   "alg": "dwt",
+   "redundant": false,
+   "ecc": false,
+   "bitsEmbedded": 320
+  },
+  {
+   "id": "dwt-red",
+   "label": "DWT + redundancy",
+   "alg": "dwt",
+   "redundant": true,
+   "ecc": false,
+   "bitsEmbedded": 320
+  },
+  {
+   "id": "dwt-red-ecc",
+   "label": "DWT + redundancy + Reed-Solomon",
+   "alg": "dwt",
+   "redundant": true,
+   "ecc": true,
+   "bitsEmbedded": 448
+  },
+  {
+   "id": "dct-red-ecc",
+   "label": "DCT + redundancy + Reed-Solomon",
+   "alg": "dct",
+   "redundant": true,
+   "ecc": true,
+   "bitsEmbedded": 448
+  }
+ ],
+ "quality": {
+  "dct-single": {
+   "psnr": 57.83102575589113,
+   "ssim": 0.9988799424443822,
+   "embedMs": 4.877519749999848,
+   "extractMs": 0.2685898303570937
+  },
+  "dwt-single": {
+   "psnr": 48.4600884836495,
+   "ssim": 0.9966079226258823,
+   "embedMs": 5.326494875000108,
+   "extractMs": 0.2453432499997977
+  },
+  "dwt-red": {
+   "psnr": 37.40451909897417,
+   "ssim": 0.957083387335073,
+   "embedMs": 7.536828624999714,
+   "extractMs": 1.0813830000001547
+  },
+  "dwt-red-ecc": {
+   "psnr": 37.38655468455317,
+   "ssim": 0.9572567325907388,
+   "embedMs": 8.932219750000343,
+   "extractMs": 0.9891118482142686
+  },
+  "dct-red-ecc": {
+   "psnr": 47.18145640364365,
+   "ssim": 0.9891718197469447,
+   "embedMs": 7.600726875000021,
+   "extractMs": 1.125096258928502
+  }
+ },
+ "pixel": {
+  "dct-single": {
+   "none": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q90": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q70": {
+    "recovery": 0.875,
+    "ber": 0.001171875,
+    "nc": 0.99765625
+   },
+   "JPEG q50": {
+    "recovery": 0,
+    "ber": 0.322265625,
+    "nc": 0.35546875000000006
+   },
+   "JPEG q30": {
+    "recovery": 0,
+    "ber": 0.45546875,
+    "nc": 0.0890625
+   },
+   "Gaussian noise σ5": {
+    "recovery": 0,
+    "ber": 0.041796875,
+    "nc": 0.91640625
+   },
+   "Gaussian noise σ10": {
+    "recovery": 0,
+    "ber": 0.37187499999999996,
+    "nc": 0.25625
+   },
+   "Salt & pepper 1%": {
+    "recovery": 0,
+    "ber": 0.21718749999999998,
+    "nc": 0.565625
+   },
+   "Blur σ1": {
+    "recovery": 0,
+    "ber": 0.384765625,
+    "nc": 0.23046875
+   },
+   "Blur σ2": {
+    "recovery": 0,
+    "ber": 0.4765625,
+    "nc": 0.046875
+   },
+   "Brightness +20": {
+    "recovery": 0.625,
+    "ber": 0.030078125,
+    "nc": 0.9398437500000001
+   },
+   "Brightness −35": {
+    "recovery": 0.125,
+    "ber": 0.094140625,
+    "nc": 0.81171875
+   },
+   "Contrast ×1.2": {
+    "recovery": 0,
+    "ber": 0.05625,
+    "nc": 0.8875
+   },
+   "Colour shift": {
+    "recovery": 0.875,
+    "ber": 0.001953125,
+    "nc": 0.99609375
+   }
+  },
+  "dwt-single": {
+   "none": {
+    "recovery": 0.875,
+    "ber": 0.000390625,
+    "nc": 0.99921875
+   },
+   "JPEG q90": {
+    "recovery": 0.875,
+    "ber": 0.000390625,
+    "nc": 0.99921875
+   },
+   "JPEG q70": {
+    "recovery": 0.75,
+    "ber": 0.00078125,
+    "nc": 0.9984375
+   },
+   "JPEG q50": {
+    "recovery": 0.875,
+    "ber": 0.000390625,
+    "nc": 0.99921875
+   },
+   "JPEG q30": {
+    "recovery": 0.75,
+    "ber": 0.0015625,
+    "nc": 0.996875
+   },
+   "Gaussian noise σ5": {
+    "recovery": 0.75,
+    "ber": 0.00078125,
+    "nc": 0.9984375
+   },
+   "Gaussian noise σ10": {
+    "recovery": 0.75,
+    "ber": 0.003515625,
+    "nc": 0.99296875
+   },
+   "Salt & pepper 1%": {
+    "recovery": 0,
+    "ber": 0.16484374999999998,
+    "nc": 0.6703124999999999
+   },
+   "Blur σ1": {
+    "recovery": 0.5,
+    "ber": 0.0078125,
+    "nc": 0.984375
+   },
+   "Blur σ2": {
+    "recovery": 0.125,
+    "ber": 0.0828125,
+    "nc": 0.8343750000000001
+   },
+   "Brightness +20": {
+    "recovery": 0.5,
+    "ber": 0.0359375,
+    "nc": 0.9281250000000001
+   },
+   "Brightness −35": {
+    "recovery": 0,
+    "ber": 0.13984375,
+    "nc": 0.7203125
+   },
+   "Contrast ×1.2": {
+    "recovery": 0,
+    "ber": 0.32656250000000003,
+    "nc": 0.346875
+   },
+   "Colour shift": {
+    "recovery": 0.25,
+    "ber": 0.09023437499999999,
+    "nc": 0.8195312499999999
+   }
+  },
+  "dwt-red": {
+   "none": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q90": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q70": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q50": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q30": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Gaussian noise σ5": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Gaussian noise σ10": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Salt & pepper 1%": {
+    "recovery": 0.75,
+    "ber": 0.0023437500000000003,
+    "nc": 0.9953124999999999
+   },
+   "Blur σ1": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Blur σ2": {
+    "recovery": 0.625,
+    "ber": 0.0027343750000000003,
+    "nc": 0.9945312500000001
+   },
+   "Brightness +20": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Brightness −35": {
+    "recovery": 0.5,
+    "ber": 0.033203125,
+    "nc": 0.9335937500000001
+   },
+   "Contrast ×1.2": {
+    "recovery": 0,
+    "ber": 0.37187500000000007,
+    "nc": 0.25625000000000003
+   },
+   "Colour shift": {
+    "recovery": 0.625,
+    "ber": 0.02578125,
+    "nc": 0.9484374999999999
+   }
+  },
+  "dwt-red-ecc": {
+   "none": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q90": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q70": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q50": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q30": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Gaussian noise σ5": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Gaussian noise σ10": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Salt & pepper 1%": {
+    "recovery": 1,
+    "ber": 0.006138392857142857,
+    "nc": 0.9877232142857143
+   },
+   "Blur σ1": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Blur σ2": {
+    "recovery": 0.875,
+    "ber": 0.009486607142857142,
+    "nc": 0.9810267857142857
+   },
+   "Brightness +20": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Brightness −35": {
+    "recovery": 0.625,
+    "ber": 0.03962053571428571,
+    "nc": 0.9207589285714286
+   },
+   "Contrast ×1.2": {
+    "recovery": 0,
+    "ber": 0.3856026785714286,
+    "nc": 0.22879464285714285
+   },
+   "Colour shift": {
+    "recovery": 0.625,
+    "ber": 0.05552455357142857,
+    "nc": 0.8889508928571429
+   }
+  },
+  "dct-red-ecc": {
+   "none": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q90": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q70": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "JPEG q50": {
+    "recovery": 0,
+    "ber": 0.3696986607142857,
+    "nc": 0.2606026785714286
+   },
+   "JPEG q30": {
+    "recovery": 0,
+    "ber": 0.4768415178571429,
+    "nc": 0.04631696428571429
+   },
+   "Gaussian noise σ5": {
+    "recovery": 1,
+    "ber": 0.00027901785714285713,
+    "nc": 0.9994419642857143
+   },
+   "Gaussian noise σ10": {
+    "recovery": 0,
+    "ber": 0.1478794642857143,
+    "nc": 0.7042410714285714
+   },
+   "Salt & pepper 1%": {
+    "recovery": 0.125,
+    "ber": 0.03850446428571429,
+    "nc": 0.9229910714285714
+   },
+   "Blur σ1": {
+    "recovery": 0,
+    "ber": 0.4614955357142857,
+    "nc": 0.07700892857142858
+   },
+   "Blur σ2": {
+    "recovery": 0,
+    "ber": 0.4787946428571429,
+    "nc": 0.04241071428571429
+   },
+   "Brightness +20": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   },
+   "Brightness −35": {
+    "recovery": 0.875,
+    "ber": 0.04045758928571429,
+    "nc": 0.9190848214285715
+   },
+   "Contrast ×1.2": {
+    "recovery": 0.75,
+    "ber": 0.03152901785714286,
+    "nc": 0.9369419642857143
+   },
+   "Colour shift": {
+    "recovery": 1,
+    "ber": 0,
+    "nc": 1
+   }
+  }
+ },
+ "geometric": {
+  "dwt-red-ecc": {
+   "Crop to 75% area": 1,
+   "Crop to 50% area": 1,
+   "Rotate 90°": 1,
+   "Rotate 180°": 1,
+   "Mirror": 1,
+   "Resize ×0.6": 0.75,
+   "Rotate 5°": 0,
+   "JPEG q70 + crop 75%": 1
+  },
+  "dct-red-ecc": {
+   "Crop to 75% area": 1,
+   "Crop to 50% area": 1,
+   "Rotate 90°": 1,
+   "Rotate 180°": 1,
+   "Mirror": 1,
+   "Resize ×0.6": 0,
+   "Rotate 5°": 0,
+   "JPEG q70 + crop 75%": 1
+  }
+ }
+}
