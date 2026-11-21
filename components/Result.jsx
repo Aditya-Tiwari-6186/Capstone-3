@@ -29,7 +29,7 @@ export default function Result({ r }) {
       {t && t.bad.length === 0 && <p>No region differs materially from the registered copy.</p>}
       {r.patternDetected && <p>A watermark-like pattern was detected, so the image probably derives from a protected one, but it could not be authenticated.</p>}
       {r.contentMatch && (() => { const c = r.contentMatch, g = c.region; return <>
-        <p><b>Potential match: <a href={`/verify/${c.regId}`}>{c.regId}</a></b>{c.owner ? ` (registered by ${c.owner})` : ""}</p>
+        <p><b>Match detected: <a href={`/verify/${c.regId}`}>{c.regId}</a></b>{c.owner ? ` (registered by ${c.owner})` : ""}</p>
         <dl>
           <dt>Confidence (pixel similarity)</dt><dd>{c.confidence}% · {c.confidence >= 97 ? "very high" : c.confidence >= 93 ? "high" : "moderate"}</dd>
           <dt>Portion of registered image</dt><dd>{c.retainedPct}%{g && c.retainedPct < 97 ? ` (matched region ${g.width} x ${g.height} px at x=${g.left}, y=${g.top} of ${c.registeredSize[0]} x ${c.registeredSize[1]})` : ""}</dd>
