@@ -5,11 +5,15 @@ data_dir="${SECUREMARK_DATA:-/data}"
 legacy_dir="${SECUREMARK_LEGACY_DATA:-/legacy-data}"
 mkdir -p "$data_dir"
 if [ -d "$legacy_dir" ]; then
-  for name in db.json ed25519.pem; do
+  for name in ed25519.pem; do
     if [ ! -e "$data_dir/$name" ] && [ -f "$legacy_dir/$name" ]; then
       cp "$legacy_dir/$name" "$data_dir/$name"
     fi
   done
+  if [ "${SECUREMARK_IMPORT_LEGACY_DB:-1}" = "1" ] &&
+     [ ! -e "$data_dir/db.json" ] && [ -f "$legacy_dir/db.json" ]; then
+    cp "$legacy_dir/db.json" "$data_dir/db.json"
+  fi
   if [ -d "$legacy_dir/files" ]; then
     mkdir -p "$data_dir/files"
     for file in "$legacy_dir"/files/*; do

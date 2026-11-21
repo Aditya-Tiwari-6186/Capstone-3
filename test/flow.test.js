@@ -7,6 +7,7 @@ import { registerImage } from "../lib/register.js";
 import { verifyImage } from "../lib/verify.js";
 import { sha256 } from "../lib/util.js";
 import * as A from "../scripts/attacks.js";
+import { execFileSync } from "node:child_process";
 import fs from "fs";
 import path from "path";
 import { FILES } from "../lib/db.js";
@@ -85,6 +86,18 @@ test("duplicates are rejected: same file, and an already-watermarked copy submit
     await assert.rejects(registerImage(bob, protectedPng, "stolen.png", "dwt"), /already registered/);
     await assert.rejects(registerImage(bob, await A.jpeg(80)(protectedPng), "recompressed.jpg", "dwt"), /already carries a SecureMark watermark/);
     await assert.rejects(registerImage(bob, await A.cropFrac(0.6, 0.3, 0.3)(protectedPng), "cropped.png", "dwt"), /already carries/);
+    const mismatchImage = path.join(FILES, "wrong-key-recompressed.jpg");
+    fs.writeFileSync(mismatchImage, await A.jpeg(80)(protectedPng));
+    try {
+        const script = `import fs from "node:fs"; import { registerImage } from "./lib/register.js"; try { await registerImage({ id: "u1", n: 2 }, fs.readFileSync(process.argv[1]), "wrong-key.jpg", "dwt"); process.exitCode = 1; } catch (e) { if (e.status !== 409 || !e.message.includes("SecureMark-like watermark")) { console.error(e); process.exitCode = 2; } }`;
+        assert.doesNotThrow(() => execFileSync(process.execPath, ["--input-type=module", "-e", script, mismatchImage], {
+            cwd: process.cwd(),
+            env: { ...process.env, SECUREMARK_SECRET: "different-key-for-test" },
+        }));
+    }
+    finally {
+        fs.unlinkSync(mismatchImage);
+    }
 });
 test("validation: garbage, tiny and unsupported inputs get clear errors", async () => {
     await assert.rejects(registerImage(bob, Buffer.from("not an image at all"), "x.png", "dwt"), /not a readable image/);

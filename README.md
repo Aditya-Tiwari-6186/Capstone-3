@@ -1,18 +1,20 @@
 # SecureMark
 
-Invisible, encrypted image watermarks for ownership verification and tamper detection. Next.js 14 (App Router) backed by PostgreSQL; Docker Compose runs both services with persistent volumes.
+Invisible, encrypted image watermarks for ownership verification and tamper detection. Next.js 14 (App Router) backed by PostgreSQL on Neon; Docker Compose runs the app connected to the shared Neon database.
 
 ## Run it
 
-The simplest way to run SecureMark is with Docker Compose. Docker Compose starts PostgreSQL and the web app, waits until the database is ready, initializes its schema automatically, and persists the data. On first startup, existing records, keys, and image files in `data/` are imported into the persistent app volume. The uncommented local-development values in `.env.example` are passed to both services, so no separate `.env` setup is required.
+The simplest way to run SecureMark is with Docker Compose connected to Neon. Set `DATABASE_URL` in the git-ignored `.env` file to the connection string from your Neon dashboard, including `sslmode=require`. Compose requires this value and passes it to the app. The database schema is initialized automatically. Docker does not import records from local `data/db.json` by default; image files and the signing key remain in the local app-data volume.
 
 ```bash
 docker compose up
 ```
 
-Open http://localhost:3000. The first account becomes the administrator. The checked-in `.env.example` values are for local development only; replace the database password and `SECUREMARK_SECRET` with strong private values for production. When migrating existing data, use the same `SECUREMARK_SECRET` as the previous installation or existing watermarks cannot be decoded.
+Copy `.env.example` to `.env`, then fill in `DATABASE_URL` with your Neon connection string. Set `SECUREMARK_SECRET` to the same long random value on every app instance that shares this database. Also make sure every instance uses the same Ed25519 signing key file; otherwise registrations made by one instance will fail signature checks on another. Keep these secrets backed up and unchanged.
 
-To stop the services while retaining data, run `docker compose down`. To delete the database and app files too, run `docker compose down -v`.
+Open http://localhost:3000. The first account becomes the administrator.
+
+To stop the app while retaining local files, run `docker compose down`. `docker compose down -v` deletes only the local app-data volume; it does not delete data in Neon.
 
 After startup:
 1. Open http://localhost:3000 and choose **Log in → Create an account**. **The first account becomes the administrator.**
@@ -30,12 +32,12 @@ Without `SMTP_URL`, e-mail confirmation is not required and confirmation/reset l
 | `npm test` | 32 tests: Reed-Solomon, watermark round trips, attacks, registration/verification flow, signatures, audit chain |
 | `npm run eval` | Robustness evaluation of five configurations (set `SAMPLE_DIR=/path/to/photos` to use your own images) |
 | `npm run build && npm start` | Production build and start (requires PostgreSQL and `SECUREMARK_SECRET`) |
-| `docker compose up` | Start PostgreSQL and the app; database and app files persist in named volumes |
+| `docker compose up` | Build and start the app connected to Neon |
 
 ### Environment (`.env.example`)
 
-`POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `DATABASE_URL` configure PostgreSQL. `SECUREMARK_SECRET` derives the AES-256-GCM payload key and JWT key; **changing it makes existing watermarks undecodable**. `PUBLIC_URL` is used in certificates, QR codes and e-mail links. `SMTP_URL`/`MAIL_FROM` are optional; real mail delivery requires your own SMTP credentials. `COOKIE_SECURE` controls secure cookies.
-Back up both Docker volumes: PostgreSQL stores users, registrations, verification history, one-time tokens, and the audit log; the app-data volume holds the generated encryption secret, Ed25519 signing key `ed25519.pem` (without it old records can no longer be verified), and protected image files.
+`DATABASE_URL` is the Neon PostgreSQL connection string; use the SSL-enabled URL from Neon. `SECUREMARK_SECRET` derives the AES-256-GCM payload key and JWT key; **changing it makes existing watermarks undecodable**. `SECUREMARK_IMPORT_LEGACY_DB` defaults to `0` in the Docker template so local records are not copied into Neon. `PUBLIC_URL` is used in certificates, QR codes and e-mail links. `SMTP_URL`/`MAIL_FROM` are optional; real mail delivery requires your own SMTP credentials. `COOKIE_SECURE` controls secure cookies.
+Neon stores users, registrations, verification history, one-time tokens, and the audit log. Back up the local app-data volume separately: it holds the Ed25519 signing key `ed25519.pem` (without it old records can no longer be verified) and protected image files.
 
 ## How it works
 
@@ -88,5 +90,5 @@ lib/forensics.js  block fingerprints, heatmap, pHash, EXIF   lib/verify.js   ver
 lib/register.js   validation + registration                  lib/db.js       PostgreSQL, atomic updates, audit chain
 lib/auth.js     sessions, tokens, rate limit, helpers        lib/cert.js     PDF certificate
 scripts/        attacks.js, eval.js      test/  node:test suites      research/  evaluation output
-docker-compose.yml   PostgreSQL + app services with persistent named volumes
+docker-compose.yml   app service connected to Neon; local app-data volume
 ```
