@@ -11,7 +11,7 @@ export default function Page({ params }) {
     <h2>Registration {params.regId}</h2>
     {err && <p className="e" role="alert">{err}</p>}
     {rec && <div className="card"><dl><dt>Registered owner</dt><dd>{rec.owner}</dd><dt>Registered at</dt><dd>{when(rec.registeredAt)}</dd><dt>Method</dt><dd>{rec.alg.toUpperCase()}</dd><dt>Size</dt><dd>{rec.width}×{rec.height} px</dd>
-      <dt>Registered SHA-256</dt><dd className="mono">{rec.registeredHash}</dd><dt>Record signature</dt><dd>{rec.recordSignatureValid ? "valid (Ed25519)" : "INVALID"} · key {rec.keyFingerprint}</dd></dl>
+      <dt>Registered SHA-256</dt><dd className="mono">{rec.registeredHash}</dd><dt>Record signature</dt><dd>{rec.recordSignatureValid ? "valid (Ed25519)" : "INVALID"} · registration key {rec.keyFingerprint || "unknown"} · this server {rec.serverKeyFingerprint}</dd></dl>
       <p className="dim">This page shows that the registration exists. It does not show that any particular image belongs to it: upload the image below to check.</p></div>}
     <Drop label="Upload an image to check against SecureMark" busy={b} onFile={f => { setB(true); setE(""); setR(null); upload("/api/verify", f).then(setR).catch(x => setE(x.message)).finally(() => setB(false)); }}/>
     {e && <p className="e" role="alert">{e}</p>}{r && <Result r={r}/>}</main>;

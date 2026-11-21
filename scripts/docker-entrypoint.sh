@@ -4,6 +4,16 @@ set -eu
 data_dir="${SECUREMARK_DATA:-/data}"
 legacy_dir="${SECUREMARK_LEGACY_DATA:-/legacy-data}"
 mkdir -p "$data_dir"
+if [ "${NODE_ENV:-}" = "production" ]; then
+  if [ -z "${SECUREMARK_SECRET:-}" ]; then
+    echo "SECUREMARK_SECRET is required in production." >&2
+    exit 1
+  fi
+  if [ -z "${SIGNING_KEY_PEM:-}" ]; then
+    echo "SIGNING_KEY_PEM is required in production." >&2
+    exit 1
+  fi
+fi
 if [ -d "$legacy_dir" ]; then
   for name in ed25519.pem; do
     if [ ! -e "$data_dir/$name" ] && [ -f "$legacy_dir/$name" ]; then

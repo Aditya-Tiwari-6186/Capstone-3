@@ -4,13 +4,15 @@
 The project is JavaScript/JSX with a Next.js 14 app, PostgreSQL JSONB state storage, Docker Compose deployment, and a 32-test Node.js suite.
 
 ## First steps for the next agent
-1. `docker compose up --build` starts the app and PostgreSQL; data and generated secrets persist in named volumes.
+1. Set `DATABASE_URL`, `SECUREMARK_SECRET`, and `SIGNING_KEY_PEM` in `.env`, then run `docker compose up --build` to start the app connected to Neon.
 2. Click through: register (first user = admin) → protect image (DWT and DCT) → download PNG → check it (VERIFIED) → check a JPEG re-save (MODIFIED, "re-encoded") → paste over a region (heatmap) → certificate PDF scans to `/verify/SMK-…` → forgot/reset password → admin page.
 3. Run `npm run eval` once to refresh `research/results.json` with your own photos (`SAMPLE_DIR=...`).
 
 ## Done in this round (vs previous handoff)
 Fixed: lost-update race in persistent storage, key derivation (HKDF, lazy), image-width-dependent bit layout (now crop-searchable), exact-pixel tamper check (now tolerant 32px block fingerprints), duplicate-claim hole (watermarked/cropped/rotated copies can't be re-registered), self-check of every issued watermark.
 Added: DCT embedding, SSIM, Reed-Solomon ECC, brightness compensation, crop/rotate/mirror/resize recovery, evidence z-score + "watermark-like but undecodable" state, pHash, EXIF, PDF certificate + QR, `/verify/[regId]`, admin dashboard, hash-chained audit log, email verification + password reset/change (session revocation via token version), rate limits, history page, research page + `npm run eval`, tests, Dockerfile/compose.
+
+Cross-device deployments must share `SECUREMARK_SECRET`, `SIGNING_KEY_PEM`, Neon state, and the `securemark_image_files` table. Legacy per-device files can be imported with `npm run migrate:files`; signature status can be audited/resigned with the scripts documented in README.
 
 ## Known limits / ideas (priority order)
 1. Contrast scaling and arbitrary-angle rotation break the lattice. Ideas: embed a known pilot pattern for scale/rotation estimation; or normalise contrast using block statistics before decoding.

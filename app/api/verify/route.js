@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentUser, ipOf, limit, route, uploaded } from "@/lib/auth";
-import { publicKeyPem, keyFingerprint } from "@/lib/crypto";
+import { publicKeyPem } from "@/lib/crypto";
 import { publicRecord, verifyImage } from "@/lib/verify";
 import { HttpError } from "@/lib/util";
 export const runtime = "nodejs";
@@ -22,5 +22,5 @@ export const GET = route(async (req) => {
     const r = await publicRecord(reg);
     if (!r)
         throw new HttpError("No such registration.", 404);
-    return NextResponse.json({ ...r, publicKey: publicKeyPem(), keyFingerprint: keyFingerprint() });
+    return NextResponse.json({ ...r, publicKey: publicKeyPem() });
 });

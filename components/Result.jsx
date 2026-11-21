@@ -16,6 +16,8 @@ export default function Result({ r }) {
         <dt>Registered at</dt><dd>{r.registeredAt ? when(r.registeredAt) : "—"}</dd>
         <dt>Watermark authentic</dt><dd>{r.cryptoValid ? `yes (AES-256-GCM tag valid${r.alg ? `, ${r.alg.toUpperCase()}` : ""})` : "no"}</dd>
         <dt>Record signature</dt><dd>{r.regId ? (r.recordSignatureValid ? "valid (Ed25519)" : "INVALID") : "—"}</dd>
+        <dt>Registration signing key</dt><dd>{r.keyFingerprint || "—"}</dd>
+        <dt>This server signing key</dt><dd>{r.serverKeyFingerprint || "—"}</dd>
         <dt>File SHA-256</dt><dd className="mono">{r.hash}</dd>
         {r.registeredHash && <><dt>Registered SHA-256</dt><dd className="mono">{r.registeredHash}</dd></>}
         <dt>Checked</dt><dd>{when(r.at)}</dd>

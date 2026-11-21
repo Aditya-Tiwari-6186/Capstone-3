@@ -24,6 +24,7 @@ test("setup: two users and one registered image", async () => {
     regId = r.regId;
     assert.match(r.regId, /^SMK-\d{4}-000001$/);
     assert.ok(r.psnr > 30 && r.ssim > 0.9);
+    assert.match((await load()).images[0].record.keyFingerprint, /^[0-9a-f]{16}$/);
     protectedPng = fs.readFileSync(path.join(FILES, r.id + ".png"));
 });
 test("registered copy verifies as VERIFIED with owner and valid signature", async () => {
@@ -75,6 +76,19 @@ test("rotated by 90 degrees: recovered, compared in registered orientation, flag
     assert.equal(v.status, "MODIFIED");
     assert.match(v.align || "", /rotated (90|270)/);
     assert.equal(v.tamper?.bad.length, 0);
+});
+test("missing block fingerprint keeps verification modified but omits tamper heatmap", async () => {
+    const image = (await load()).images[0], fpFile = path.join(FILES, image.id + ".fp"), fp = fs.readFileSync(fpFile);
+    fs.unlinkSync(fpFile);
+    try {
+        const v = await verifyImage(await A.brightness(15)(protectedPng), who);
+        assert.equal(v.status, "MODIFIED");
+        assert.equal(v.tamper, undefined);
+        assert.equal(v.heatmap, undefined);
+    }
+    finally {
+        fs.writeFileSync(fpFile, fp);
+    }
 });
 test("the original, unprotected upload verifies as UNREGISTERED (not VERIFIED)", async () => {
     const v = await verifyImage(orig, who);

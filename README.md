@@ -4,17 +4,19 @@ Invisible, encrypted image watermarks for ownership verification and tamper dete
 
 ## Run it
 
-The simplest way to run SecureMark is with Docker Compose connected to Neon. Set `DATABASE_URL` in the git-ignored `.env` file to the connection string from your Neon dashboard, including `sslmode=require`. Compose requires this value and passes it to the app. The database schema is initialized automatically. Docker does not import records from local `data/db.json` by default; image files and the signing key remain in the local app-data volume.
+The simplest way to run SecureMark is with Docker Compose connected to Neon. Set `DATABASE_URL`, `SECUREMARK_SECRET`, and `SIGNING_KEY_PEM` in the git-ignored `.env` file. Every instance using the shared database must use the same secret and signing key. Docker creates the database tables automatically and stores protected PNGs and block fingerprints in Neon.
+
+Copy `.env.example` to `.env`, then set the Neon URL, a long random `SECUREMARK_SECRET`, and a shared `SIGNING_KEY_PEM`. Use `npm run keygen` to create a new Ed25519 key. To preserve an existing installation, convert its `data/ed25519.pem` with `awk 'NF {sub(/\r/,""); printf "%s\\n",$0;}' data/ed25519.pem` and place that one-line value after `SIGNING_KEY_PEM=`; do not generate a replacement. Store the value privately and use the exact same values on every app instance.
 
 ```bash
 docker compose up
 ```
 
-Copy `.env.example` to `.env`, then fill in `DATABASE_URL` with your Neon connection string. Set `SECUREMARK_SECRET` to the same long random value on every app instance that shares this database. Also make sure every instance uses the same Ed25519 signing key file; otherwise registrations made by one instance will fail signature checks on another. Keep these secrets backed up and unchanged.
-
 Open http://localhost:3000. The first account becomes the administrator.
 
 To stop the app while retaining local files, run `docker compose down`. `docker compose down -v` deletes only the local app-data volume; it does not delete data in Neon.
+
+For an existing deployment, run `npm run migrate:files` once to copy local protected images and fingerprints into Neon. Run `npm run audit:signatures` to check records against the configured key. `npm run resign` is a dry run; set `OLD_PUBLIC_KEY_PEM` or `OLD_PRIVATE_KEY_PEM` in `.env` to identify records verifiably signed by a previous key, then use `npm run resign -- --apply` to update only those records.
 
 After startup:
 1. Open http://localhost:3000 and choose **Log in → Create an account**. **The first account becomes the administrator.**
@@ -29,15 +31,19 @@ Without `SMTP_URL`, e-mail confirmation is not required and confirmation/reset l
 
 | Command | What it does |
 |---|---|
-| `npm test` | 32 tests: Reed-Solomon, watermark round trips, attacks, registration/verification flow, signatures, audit chain |
+| `npm test` | Tests for Reed-Solomon, watermark round trips, attacks, registration/verification flow, signing keys, and audit chain |
 | `npm run eval` | Robustness evaluation of five configurations (set `SAMPLE_DIR=/path/to/photos` to use your own images) |
-| `npm run build && npm start` | Production build and start (requires PostgreSQL and `SECUREMARK_SECRET`) |
+| `npm run build && npm start` | Production build and start (requires `DATABASE_URL`, `SECUREMARK_SECRET`, and `SIGNING_KEY_PEM`) |
 | `docker compose up` | Build and start the app connected to Neon |
+| `npm run keygen` | Print an Ed25519 `SIGNING_KEY_PEM` value (keep it private and share it only across trusted app instances) |
+| `npm run migrate:files` | Import local protected PNGs and fingerprints into Neon |
+| `npm run audit:signatures` | Report registration records that do not verify with the configured key |
+| `npm run resign -- --apply` | Re-sign only records verified by the supplied old key; without `--apply`, performs a dry run |
 
 ### Environment (`.env.example`)
 
-`DATABASE_URL` is the Neon PostgreSQL connection string; use the SSL-enabled URL from Neon. `SECUREMARK_SECRET` derives the AES-256-GCM payload key and JWT key; **changing it makes existing watermarks undecodable**. `SECUREMARK_IMPORT_LEGACY_DB` defaults to `0` in the Docker template so local records are not copied into Neon. `PUBLIC_URL` is used in certificates, QR codes and e-mail links. `SMTP_URL`/`MAIL_FROM` are optional; real mail delivery requires your own SMTP credentials. `COOKIE_SECURE` controls secure cookies.
-Neon stores users, registrations, verification history, one-time tokens, and the audit log. Back up the local app-data volume separately: it holds the Ed25519 signing key `ed25519.pem` (without it old records can no longer be verified) and protected image files.
+`DATABASE_URL` is the Neon PostgreSQL connection string; use the SSL-enabled URL from Neon. `SECUREMARK_SECRET` derives the AES-256-GCM payload key and JWT key; **every instance must use the same value, and changing it makes existing watermarks undecodable**. `SIGNING_KEY_PEM` is the shared Ed25519 PKCS8 private key with newlines represented as `\n`; **every instance must use the same value**. In production, both keys are required. Development may fall back to `data/ed25519.pem` with a warning. `SECUREMARK_IMPORT_LEGACY_DB` defaults to `0` in the Docker template so local records are not copied into Neon. `PUBLIC_URL` is used in certificates, QR codes and e-mail links. `SMTP_URL`/`MAIL_FROM` are optional; real mail delivery requires your own SMTP credentials. `COOKIE_SECURE` controls secure cookies.
+Neon stores users, registrations, verification history, one-time tokens, the audit log, protected PNGs, and block fingerprints. Back up the Neon database and any local `data/` key files you need for migration.
 
 ## How it works
 
@@ -45,7 +51,7 @@ Neon stores users, registrations, verification history, one-time tokens, and the
 - **DWT**: feature = the cell's Haar LL value (a 3-level Haar LL coefficient of an 8×8 cell is 8× its mean), so only the low band moves and details are untouched. Step 12, typically ≈ 37 dB PSNR.
 - **DCT**: feature = the (2,3) coefficient of the cell's 8×8 DCT. Step 28, typically ≈ 47 dB PSNR, less robust.
 The 448-bit codeword is repeated across the whole image (cell *(x,y)* carries bit `(x + 37·y) mod 448`) and decoded by majority vote, so cropping becomes a cyclic shift that the decoder searches for.
-The server stores a record `{regId, owner, time, algorithm, SHA-256 of original and of protected file, size, pHash}` signed with Ed25519, plus a block fingerprint. It refuses images that are already registered or that already carry a SecureMark watermark (including cropped, rotated, resized or re-compressed copies), and refuses any image whose watermark cannot be read back.
+The server stores a record `{regId, owner, time, algorithm, SHA-256 of original and of protected file, size, pHash, signing-key fingerprint}` signed with Ed25519, plus the protected PNG and block fingerprint in Neon. It refuses images that are already registered or that already carry a SecureMark watermark (including cropped, rotated, resized or re-compressed copies), and refuses any image whose watermark cannot be read back.
 
 **Verification.** Recover the payload (as is, then 7 rotations/mirrors, then crop re-synchronisation over all 64 pixel offsets × bit shifts, then rescaling to registered sizes), check the AES-GCM tag, look up the record, check its Ed25519 signature and that payload and record agree, compare SHA-256. Four outcomes: **registered and unchanged**, **registered but modified**, **no watermark found** (never claimed as proof of "unregistered"), **inconclusive** (a watermark-like pattern that cannot be authenticated, a missing/unsigned record, …).
 
@@ -74,7 +80,7 @@ DWT + redundancy + Reed-Solomon (the default) recovered 100% after JPEG q30–q9
 
 - Geometric robustness is limited to crop, 90° rotations/mirroring and rescaling to a known registered size. Arbitrary rotation, perspective, and combined rescale+crop are not recovered. Contrast/gamma changes break the lattice.
 - A missing watermark never proves an image is unregistered.
-- PostgreSQL stores application state as a locked JSONB row so the existing atomic state-update and audit-chain behavior is preserved. Rate limits remain in-process memory.
+- PostgreSQL stores application state as a locked JSONB row so the existing atomic state-update and audit-chain behavior is preserved; image bytes live in a separate idempotently-created table because image records are embedded in JSONB rather than a relational `images` table. Rate limits remain in-process memory.
 - The original upload is not stored, only its hash. Registration does not prove authorship: the system records *who registered which file first*. The certificate says so.
 - Not implemented: AI forgery detection, a dedicated dispute workflow, BMP input (the image library cannot read BMP), S3 storage.
 - **Not yet run end-to-end under `next dev`/`next build` by the author of this change** (the build sandbox had no npm network access). Everything in `lib/` and `scripts/` is exercised by the 32 tests; the Next.js routes, pages, `bcryptjs`, `jose`, `qrcode` and `nodemailer` code paths are written against their documented APIs but untested. First step after `npm install`: run `npm test`, `npm run build`, and click through the flow above.
@@ -90,5 +96,5 @@ lib/forensics.js  block fingerprints, heatmap, pHash, EXIF   lib/verify.js   ver
 lib/register.js   validation + registration                  lib/db.js       PostgreSQL, atomic updates, audit chain
 lib/auth.js     sessions, tokens, rate limit, helpers        lib/cert.js     PDF certificate
 scripts/        attacks.js, eval.js      test/  node:test suites      research/  evaluation output
-docker-compose.yml   app service connected to Neon; local app-data volume
+docker-compose.yml   app service connected to Neon
 ```

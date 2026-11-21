@@ -7,9 +7,13 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start.js",
     "test": "node --test test/*.test.js",
-    "eval": "node scripts/eval.js"
+    "eval": "node scripts/eval.js",
+    "keygen": "node scripts/keygen.js",
+    "migrate:files": "node scripts/migrate-files.js",
+    "audit:signatures": "node scripts/audit-signatures.js",
+    "resign": "node scripts/resign.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
